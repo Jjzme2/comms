@@ -56,6 +56,7 @@ export interface Note {
   authorId: string
   authorName: string
   sharedWith: 'all' | string[]
+  projectId?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -76,6 +77,35 @@ export interface Invite {
   invitedBy: string
   invitedAt: Date
   status: 'pending' | 'accepted'
+}
+
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+export interface Project {
+  id: string
+  name: string
+  description?: string
+  status: 'active' | 'archived'
+  channelId?: string
+  createdBy: string
+  createdByName: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ProjectTask {
+  id: string
+  projectId: string
+  title: string
+  description?: string
+  status: 'todo' | 'in-progress' | 'done'
+  assigneeId?: string
+  assigneeName?: string
+  order: number
+  createdBy: string
+  createdByName: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 // ── Knowledge Base ────────────────────────────────────────────────────────────

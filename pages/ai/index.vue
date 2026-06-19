@@ -31,9 +31,9 @@ async function newSession() {
       <h1 class="font-semibold">AI Chat</h1>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 flex gap-4">
+    <div class="flex-1 overflow-y-auto p-4 flex flex-col sm:flex-row gap-4">
       <!-- Sessions list -->
-      <div class="flex flex-col gap-2 w-60 shrink-0">
+      <div class="flex flex-col gap-2 w-full sm:w-60 sm:shrink-0">
         <h2 class="text-xs font-semibold uppercase tracking-wider text-cool-500 mb-1">Past conversations</h2>
         <NuxtLink
           v-for="s in aiStore.sessions"

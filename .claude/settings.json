@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "mcp__claude_ai_Gmail__create_draft",
-      "Bash(Remove-Item \"c:\\\\Users\\\\Jjzet\\\\Projects\\\\comms\\\\middleware\\\\auth.ts\")"
+      "Bash(Remove-Item \"c:\\\\Users\\\\Jjzet\\\\Projects\\\\comms\\\\middleware\\\\auth.ts\")",
+      "PowerShell(netstat -ano)",
+      "Read(//c/Users/Jjzet/AppData/Local/**)",
+      "PowerShell($pw = \\(Get-Command npx\\).Source; $pwDir = Split-Path \\(npx which playwright 2>$null\\) -Parent 2>$null; node -e \"require.resolve\\('playwright'\\)\" 2>&1; node -e \"require.resolve\\('@playwright/test'\\)\" 2>&1)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000/login\" -UseBasicParsing; $r.Content | Select-String -Pattern \"h-dvh|inset-y-0|-translate-x-full|bars-3|mobileSidebar\" -AllMatches | ForEach-Object { $_.Matches } | Select-Object Value | Select-Object -First 20)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000/login\" -UseBasicParsing; $r.Content.Substring\\(0, 2000\\))",
+      "PowerShell($dirs = Get-ChildItem \"C:\\\\Users\\\\Jjzet\\\\AppData\\\\Local\\\\npm-cache\\\\_npx\\\\\" | ForEach-Object { $_.FullName }; foreach \\($d in $dirs\\) { $f = \"$d\\\\node_modules\\\\@playwright\\\\test\\\\package.json\"; if \\(Test-Path $f\\) { Write-Host $f; break } })",
+      "PowerShell($dirs = Get-ChildItem \"C:\\\\Users\\\\Jjzet\\\\AppData\\\\Local\\\\npm-cache\\\\_npx\\\\\" | ForEach-Object { $_.FullName }; foreach \\($d in $dirs\\) { $f = \"$d\\\\node_modules\\\\playwright\\\\package.json\"; if \\(Test-Path $f\\) { Write-Host $f } })",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000/login\" -UseBasicParsing; Write-Host \"HTTP status: $\\($r.StatusCode\\)\"; Write-Host \"Response length: $\\($r.Content.Length\\)\")"
     ]
   }
 }

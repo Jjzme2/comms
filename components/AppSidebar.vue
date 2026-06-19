@@ -2,6 +2,7 @@
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const route = useRoute()
+const sidebarOpen = useMobileSidebar()
 const showNewChannel = ref(false)
 const newChannelName = ref('')
 const newChannelDesc = ref('')
@@ -10,7 +11,12 @@ const showFeedback = ref(false)
 
 onMounted(() => chatStore.subscribeChannels())
 
+watch(() => route.path, () => {
+  sidebarOpen.value = false
+})
+
 const navItems = [
+  { label: 'Projects', icon: 'i-heroicons-folder-open', to: '/projects' },
   { label: 'Files', icon: 'i-heroicons-folder', to: '/files' },
   { label: 'Notes', icon: 'i-heroicons-document-text', to: '/notes' },
   { label: 'Quick Links', icon: 'i-heroicons-link', to: '/quicklinks' },
@@ -39,10 +45,23 @@ async function createChannel() {
 </script>
 
 <template>
-  <aside class="w-60 bg-cool-900 flex flex-col border-r border-cool-800 shrink-0">
-    <!-- App name -->
+  <aside
+    :class="[
+      'fixed inset-y-0 left-0 z-40 w-60 bg-cool-900 flex flex-col border-r border-cool-800 shrink-0 transition-transform duration-200',
+      'md:relative md:z-auto md:translate-x-0',
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+    ]"
+  >
+    <!-- App name + mobile close -->
     <div class="h-12 flex items-center px-4 border-b border-cool-800 shrink-0">
-      <span class="font-bold tracking-tight text-indigo-400">comms</span>
+      <span class="font-bold tracking-tight text-indigo-400 flex-1">comms</span>
+      <button
+        class="md:hidden text-cool-400 hover:text-cool-200 p-1 -mr-1"
+        type="button"
+        @click="sidebarOpen = false"
+      >
+        <UIcon name="i-heroicons-x-mark" class="w-5 h-5" />
+      </button>
     </div>
 
     <div class="flex-1 overflow-y-auto py-2 space-y-4">

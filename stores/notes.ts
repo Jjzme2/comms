@@ -61,7 +61,7 @@ export const useNotesStore = defineStore('notes', () => {
     return ref.id
   }
 
-  async function saveNote(id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'sharedWith'>>) {
+  async function saveNote(id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'sharedWith' | 'projectId'>>) {
     await setDoc(doc(db(), 'notes', id), {
       ...updates,
       updatedAt: serverTimestamp(),

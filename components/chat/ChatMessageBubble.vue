@@ -7,6 +7,7 @@ const chatStore = useChatStore()
 const filesStore = useFilesStore()
 
 const isOwn = computed(() => props.message.authorId === authStore.user?.uid)
+const showReactions = ref(false)
 
 function formatTime(date: Date) {
   return new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(date)
@@ -19,13 +20,22 @@ async function openFile() {
   const url = await filesStore.getFileUrl(props.message.r2Key)
   window.open(url, '_blank')
 }
+
+function toggleReactions() {
+  showReactions.value = !showReactions.value
+}
+
+async function react(emoji: string) {
+  await chatStore.toggleReaction(props.message.id, emoji)
+  showReactions.value = false
+}
 </script>
 
 <template>
   <div :class="['flex gap-2 group', isOwn ? 'flex-row-reverse' : 'flex-row']">
     <UAvatar :alt="message.authorName" size="xs" class="mt-1 shrink-0" />
 
-    <div :class="['max-w-[70%]', isOwn ? 'items-end' : 'items-start', 'flex flex-col gap-1']">
+    <div :class="['max-w-[85%] sm:max-w-[70%]', isOwn ? 'items-end' : 'items-start', 'flex flex-col gap-1']">
       <div class="flex items-center gap-2 text-xs text-cool-500" :class="isOwn ? 'flex-row-reverse' : 'flex-row'">
         <span class="font-medium text-cool-300">{{ message.authorName }}</span>
         <span>{{ formatTime(message.createdAt) }}</span>
@@ -66,27 +76,42 @@ async function openFile() {
         </div>
       </div>
 
-      <!-- Reactions -->
+      <!-- Reactions display -->
       <div v-if="Object.keys(message.reactions ?? {}).length" class="flex gap-1 flex-wrap">
         <button
           v-for="(users, emoji) in message.reactions"
           :key="emoji"
-          class="flex items-center gap-1 bg-cool-800 hover:bg-cool-700 rounded-full px-2 py-0.5 text-xs"
+          class="flex items-center gap-1 bg-cool-800 hover:bg-cool-700 rounded-full px-2 py-0.5 text-xs touch-manipulation"
           @click="chatStore.toggleReaction(message.id, emoji as string)"
         >
           {{ emoji }} {{ (users as string[]).length }}
         </button>
       </div>
 
-      <!-- Reaction picker (visible on hover) -->
-      <div class="hidden group-hover:flex gap-1 mt-0.5">
+      <!-- Reaction picker: hover on desktop, toggle on touch -->
+      <div :class="['gap-1 mt-0.5', showReactions ? 'flex' : 'hidden group-hover:flex']">
         <button
           v-for="emoji in REACTIONS"
           :key="emoji"
-          class="text-sm hover:scale-110 transition-transform"
-          @click="chatStore.toggleReaction(message.id, emoji)"
+          class="text-sm hover:scale-110 transition-transform touch-manipulation"
+          @click="react(emoji)"
         >{{ emoji }}</button>
+        <!-- Close button when opened via tap -->
+        <button
+          v-if="showReactions"
+          class="text-cool-500 hover:text-cool-300 text-xs px-1"
+          @click="showReactions = false"
+        >✕</button>
       </div>
+
+      <!-- React button: visible on mobile (touch) only -->
+      <button
+        v-if="!showReactions"
+        class="group-hover:hidden text-cool-600 hover:text-cool-400 text-xs mt-0.5 touch-manipulation sm:hidden"
+        @click="toggleReactions"
+      >
+        <UIcon name="i-heroicons-face-smile" class="w-4 h-4" />
+      </button>
     </div>
   </div>
 </template>

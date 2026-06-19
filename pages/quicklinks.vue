@@ -27,12 +27,10 @@ async function addLink() {
 
 <template>
   <div class="flex-1 flex flex-col min-h-0">
-    <div class="h-12 flex items-center px-4 border-b border-cool-800 gap-3 shrink-0">
-      <h1 class="font-semibold">Quick Links</h1>
-      <div class="ml-auto flex items-center gap-2">
-        <UInput v-model="store.search" placeholder="Search…" icon="i-heroicons-magnifying-glass" size="sm" />
-        <UButton size="sm" icon="i-heroicons-plus" @click="showAdd = true">Add link</UButton>
-      </div>
+    <div class="flex flex-wrap items-center px-4 gap-2 border-b border-cool-800 shrink-0 min-h-12 py-2">
+      <h1 class="font-semibold mr-auto">Quick Links</h1>
+      <UInput v-model="store.search" placeholder="Search…" icon="i-heroicons-magnifying-glass" size="sm" class="w-36 sm:w-48" />
+      <UButton size="sm" icon="i-heroicons-plus" @click="showAdd = true">Add link</UButton>
     </div>
 
     <!-- Tag filter bar -->

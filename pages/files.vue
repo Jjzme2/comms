@@ -26,13 +26,11 @@ function formatSize(bytes: number) {
 
 <template>
   <div class="flex-1 flex flex-col min-h-0">
-    <div class="h-12 flex items-center px-4 border-b border-cool-800 shrink-0 gap-3">
-      <h1 class="font-semibold">Files</h1>
-      <div class="ml-auto flex items-center gap-2">
-        <UInput v-model="search" placeholder="Search files..." icon="i-heroicons-magnifying-glass" size="sm" />
-        <USelect v-model="typeFilter" :options="[{ label: 'All', value: '' }, { label: 'Images', value: 'image' }, { label: 'Documents', value: 'doc' }]" size="sm" />
-        <FileUploader />
-      </div>
+    <div class="flex flex-wrap items-center px-4 gap-2 border-b border-cool-800 shrink-0 min-h-12 py-2">
+      <h1 class="font-semibold mr-auto">Files</h1>
+      <UInput v-model="search" placeholder="Search…" icon="i-heroicons-magnifying-glass" size="sm" class="w-36 sm:w-48" />
+      <USelect v-model="typeFilter" :options="[{ label: 'All', value: '' }, { label: 'Images', value: 'image' }, { label: 'Docs', value: 'doc' }]" size="sm" class="w-24 sm:w-32" />
+      <FileUploader />
     </div>
 
     <div class="flex-1 overflow-y-auto p-4">
