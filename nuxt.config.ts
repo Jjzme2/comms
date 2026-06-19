@@ -2,6 +2,15 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
+  app: {
+    head: {
+      meta: [
+        { name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet' },
+        { name: 'googlebot', content: 'noindex, nofollow' },
+      ],
+    },
+  },
+
   devServer: {
     port: 4200,
   },
