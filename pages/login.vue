@@ -2,8 +2,10 @@
 definePageMeta({ layout: 'auth' })
 
 const authStore = useAuthStore()
-const mode = ref<'login' | 'register'>('login')
-const email = ref('')
+const route = useRoute()
+
+const mode = ref<'login' | 'register'>(route.query.register ? 'register' : 'login')
+const email = ref(typeof route.query.email === 'string' ? route.query.email : '')
 const password = ref('')
 const displayName = ref('')
 const loading = ref(false)

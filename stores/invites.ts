@@ -21,7 +21,6 @@ export const useInvitesStore = defineStore('invites', () => {
 
   function subscribe() {
     unsub?.()
-    // invites/{email} — email is the doc ID
     const q = query(collection(db(), 'invites'), orderBy('invitedAt', 'desc'))
     unsub = onSnapshot(q, (snap) => {
       invites.value = snap.docs.map(d => ({
@@ -32,9 +31,9 @@ export const useInvitesStore = defineStore('invites', () => {
     })
   }
 
-  async function addInvite(email: string) {
+  async function addInvite(email: string): Promise<{ emailSent: boolean; emailError?: string }> {
     const user = authStore.user
-    if (!user) return
+    if (!user) return { emailSent: false, emailError: 'Not authenticated' }
     const normalised = email.trim().toLowerCase()
     await setDoc(doc(db(), 'invites', normalised), {
       invitedBy: user.uid,
@@ -42,6 +41,16 @@ export const useInvitesStore = defineStore('invites', () => {
       invitedAt: serverTimestamp(),
       status: 'pending',
     })
+
+    try {
+      await $fetch('/api/invites/send-email', {
+        method: 'POST',
+        body: { email: normalised, inviterName: user.displayName ?? 'Someone' },
+      })
+      return { emailSent: true }
+    } catch (e: any) {
+      return { emailSent: false, emailError: e?.data?.message ?? e?.message ?? 'Email not sent' }
+    }
   }
 
   async function revokeInvite(email: string) {

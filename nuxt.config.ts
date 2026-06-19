@@ -34,7 +34,10 @@ export default defineNuxtConfig({
     r2SecretAccessKey: '',
     r2BucketName: '',
     r2Endpoint: '',
+    resendApiKey: '',
+    resendFrom: '',
     public: {
+      appUrl: '',
       firebaseApiKey: '',
       firebaseAuthDomain: '',
       firebaseProjectId: '',
