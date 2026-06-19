@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Gmail__create_draft",
+      "Bash(Remove-Item \"c:\\\\Users\\\\Jjzet\\\\Projects\\\\comms\\\\middleware\\\\auth.ts\")"
+    ]
+  }
+}

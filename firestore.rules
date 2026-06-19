@@ -1,0 +1,123 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Reads the caller's users/{uid} doc to check admin role.
+    // Costs one read per call — acceptable for a small private app.
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ── Users ──────────────────────────────────────────────────────────────
+    // Any member can read profiles (needed for author display names).
+    // Write is restricted to own document so loadOrCreateUserProfile works
+    // without admin-level access.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── Invites ────────────────────────────────────────────────────────────
+    // get is open so checkInvite() works before Firebase Auth creates the user.
+    // list/create/delete require admin; update allows the registering user to
+    // flip their own invite to 'accepted'.
+    match /invites/{email} {
+      allow get:    if true;
+      allow list:   if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isSignedIn() && request.auth.token.email.lower() == email);
+      allow delete: if isAdmin();
+    }
+
+    // ── Channels ───────────────────────────────────────────────────────────
+    // Any member can create channels and update (lastMessage merge from sendMessage).
+    // Only admins can delete.
+    match /channels/{channelId} {
+      allow read:          if isSignedIn();
+      allow create:        if isSignedIn();
+      allow update:        if isSignedIn();
+      allow delete:        if isAdmin();
+    }
+
+    // ── Messages ───────────────────────────────────────────────────────────
+    // Any member can read and update (reactions). Creates must set authorId to
+    // the caller's uid. Deletes require authorship or admin.
+    match /messages/{messageId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid
+        || isAdmin();
+    }
+
+    // ── Files ──────────────────────────────────────────────────────────────
+    // File metadata is readable by all members. Uploader field must match caller.
+    // Metadata is immutable after creation; deletes require ownership or admin.
+    match /files/{fileId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.uploadedBy == request.auth.uid;
+      allow update: if false;
+      allow delete: if (isSignedIn() && resource.data.uploadedBy == request.auth.uid)
+        || isAdmin();
+    }
+
+    // ── Notes ──────────────────────────────────────────────────────────────
+    // Read is allowed for: the author, notes shared with everyone (string 'all'),
+    // or notes whose sharedWith array contains the caller's uid.
+    // All writes are restricted to the author.
+    match /notes/{noteId} {
+      allow read: if isSignedIn() && (
+        resource.data.authorId == request.auth.uid ||
+        (resource.data.sharedWith is string && resource.data.sharedWith == 'all') ||
+        (resource.data.sharedWith is list && request.auth.uid in resource.data.sharedWith)
+      );
+      allow create: if isSignedIn() &&
+        request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── Quick Links ────────────────────────────────────────────────────────
+    // All members can read and add links. Links are immutable after creation.
+    // Deletes require ownership or admin.
+    match /quicklinks/{linkId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.addedBy == request.auth.uid;
+      allow update: if false;
+      allow delete: if (isSignedIn() && resource.data.addedBy == request.auth.uid)
+        || isAdmin();
+    }
+
+    // ── AI Sessions ────────────────────────────────────────────────────────
+    // Fully private: only the session owner can read or write.
+    match /ai_sessions/{sessionId} {
+      allow read:          if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow create:        if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update:        if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow delete:        if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    // ── AI Messages ────────────────────────────────────────────────────────
+    // Messages have no authorId field, so ownership is verified by looking up
+    // the parent session. Messages are append-only (no update or delete).
+    match /ai_messages/{messageId} {
+      allow read: if isSignedIn() &&
+        get(/databases/$(database)/documents/ai_sessions/$(resource.data.sessionId))
+          .data.authorId == request.auth.uid;
+      allow create: if isSignedIn() &&
+        get(/databases/$(database)/documents/ai_sessions/$(request.resource.data.sessionId))
+          .data.authorId == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
